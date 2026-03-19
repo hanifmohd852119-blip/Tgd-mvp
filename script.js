@@ -1,3 +1,4 @@
+alert("JS Working");
 let earning = 0;
 let running = false;
 let currentUser = "";
