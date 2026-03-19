@@ -42,4 +42,4 @@ setInterval(() => {
       localStorage.setItem(currentUser, earning);
     }
   }
-}, 1000);
+}, 1000);<script src="script.js"></script>
