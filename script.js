@@ -3,19 +3,20 @@ let running = false;
 let currentUser = "";
 let devices = [];
 
-// Save devices to localStorage
+// Save devices
 function saveDevices() {
-  if (currentUser) {
-    localStorage.setItem(currentUser + "_devices", JSON.stringify(devices));
-  }
+  if (currentUser) localStorage.setItem(currentUser + "_devices", JSON.stringify(devices));
 }
 
-// Render devices buttons
+// Render devices + multiplier
 function renderDevices() {
   const divParent = document.getElementById("devices");
   divParent.innerHTML = "";
+  let activeDevices = 0;
+
   devices.forEach(d => {
     if (d.running) {
+      activeDevices++;
       const div = document.createElement("div");
       div.className = "device";
       div.id = "device" + d.id;
@@ -23,6 +24,12 @@ function renderDevices() {
       divParent.appendChild(div);
     }
   });
+
+  const multiplierSpan = document.getElementById("multiplier");
+  if (activeDevices > 0) {
+    let multi = 1 + (activeDevices - 1) * 0.5;
+    multiplierSpan.innerText = `x${multi.toFixed(1)}`;
+  } else multiplierSpan.innerText = "";
 }
 
 // Disconnect a device
@@ -42,12 +49,11 @@ function connect() {
   running = true;
 }
 
-// Load user and devices on page load
+// Load user + devices
 window.onload = function() {
   const savedUser = localStorage.getItem("currentUser");
   if (savedUser) {
     currentUser = savedUser;
-
     let savedEarning = localStorage.getItem(currentUser);
     if (savedEarning) earning = parseFloat(savedEarning);
 
@@ -55,15 +61,13 @@ window.onload = function() {
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("app").style.display = "block";
 
-    // Load devices
     devices = JSON.parse(localStorage.getItem(currentUser + "_devices")) || [];
     renderDevices();
-
     updateTopEarners();
   }
 }
 
-// Login function
+// Login
 function login() {
   const username = document.getElementById("username").value;
   if (!username) { alert("Enter username"); return; }
@@ -78,10 +82,8 @@ function login() {
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("app").style.display = "block";
 
-  // Load devices
   devices = JSON.parse(localStorage.getItem(currentUser + "_devices")) || [];
   renderDevices();
-
   updateTopEarners();
 }
 
@@ -100,15 +102,23 @@ setInterval(() => {
   updateTopEarners();
 }, 1000);
 
-// Top Earners leaderboard
+// Sorted Top Earners
 function updateTopEarners() {
   const earnersList = document.getElementById("earnersList");
   earnersList.innerHTML = "";
+
+  let users = [];
   for (let key in localStorage) {
     if (localStorage.hasOwnProperty(key) && key !== "currentUser" && !key.endsWith("_devices")) {
-      const li = document.createElement("li");
-      li.innerText = `${key}: ${parseFloat(localStorage.getItem(key)).toFixed(3)}`;
-      earnersList.appendChild(li);
+      users.push({name: key, earn: parseFloat(localStorage.getItem(key))});
     }
   }
+
+  users.sort((a,b) => b.earn - a.earn);
+
+  users.forEach(u => {
+    const li = document.createElement("li");
+    li.innerText = `${u.name}: ${u.earn.toFixed(3)}`;
+    earnersList.appendChild(li);
+  });
 }
