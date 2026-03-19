@@ -124,3 +124,16 @@ function toggleLeaderboard(){
     document.getElementById("leaderboardCard").style.display = leaderboardVisible?"block":"none";
     if(leaderboardVisible) renderLeaderboard();
 }
+function addUser(){
+    let newUser=document.getElementById("newUser").value.trim();
+    if(newUser && !users[newUser]){
+        users[newUser]=0;
+        localStorage.setItem("users",JSON.stringify(users));
+        alert(`${newUser} added`);
+        document.getElementById("newUser").value="";
+        // Refresh dashboard immediately
+        renderDevices();
+        updateEarnings(); // optional: network earnings update
+        if(leaderboardVisible) renderLeaderboard(); // leaderboard update if visible
+    }
+}
