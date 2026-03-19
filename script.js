@@ -143,3 +143,44 @@ function toggleLeaderboard(){
     document.getElementById("leaderboardCard").style.display = leaderboardVisible ? "block" : "none";
     if(leaderboardVisible) renderLeaderboard();
 }
+let users = JSON.parse(localStorage.getItem("users")) || {};
+initialUsers.forEach(u => { 
+    if(!users[u]) users[u] = 0; 
+});
+
+// --- ADD THIS LINE ---
+if(!users[currentUser]) users[currentUser] = 0;
+
+localStorage.setItem("users", JSON.stringify(users));
+
+// Initialize current earnings variable
+let earnings = users[currentUser];
+function addUser(){
+    let newUser = document.getElementById("newUser").value.trim();
+    if(newUser && !users[newUser]){
+        users[newUser] = 0;
+        localStorage.setItem("users", JSON.stringify(users));
+        alert(`${newUser} added`);
+        document.getElementById("newUser").value = "";
+
+        // --- Dashboard + earnings refresh immediately ---
+        renderDevices();                // devices list refresh
+        updateEarnings();               // earnings update
+        if(leaderboardVisible) renderLeaderboard(); // leaderboard update if visible
+    }
+}
+function addUser(){
+    let newUser = document.getElementById("newUser").value.trim();
+    if(newUser && !users[newUser]){
+        // Add new user with initial earnings
+        users[newUser] = 0;
+        localStorage.setItem("users", JSON.stringify(users));
+        alert(`${newUser} added`);
+        document.getElementById("newUser").value = "";
+
+        // --- AI-task ready updates ---
+        renderDevices();                // Refresh devices for dashboard
+        updateEarnings();               // Update earnings for all users
+        if(leaderboardVisible) renderLeaderboard(); // Refresh leaderboard if visible
+    }
+}
