@@ -1,171 +1,126 @@
-let earning = 0;
-let running = false;
-let currentUser = "";
-let devices = [];
-let loggedInUsers = JSON.parse(localStorage.getItem("loggedInUsers")) || [];
+// Welcome User
+let currentUser = prompt("Enter your username") || "Guest";
+document.getElementById("welcome").innerText = "Welcome, " + currentUser;
 
-// ADMIN: Add new user
-function addUser(){
-  const newUser = document.getElementById("newUser").value.trim();
-  if(!newUser){ alert("Enter username"); return; }
+// Users init
+let initialUsers = ["Mohd Hanif","Friend1","Friend2","Friend3"];
+let users = JSON.parse(localStorage.getItem("users")) || {};
+initialUsers.forEach(u=>{ if(!users[u]) users[u]=0; });
+localStorage.setItem("users", JSON.stringify(users));
 
-  if(!localStorage.getItem(newUser)){
-    localStorage.setItem(newUser, 0);
-    alert(`User "${newUser}" added to network!`);
-  } else {
-    alert("User already exists!");
-  }
-  document.getElementById("newUser").value = "";
-}
+// Devices setup (5 per user by default)
+let devices = JSON.parse(localStorage.getItem("devices")) || [];
+for(let i=1;i<=5;i++) if(!devices.includes(i)) devices.push(i);
 
-// Save devices
-function saveDevices(){
-  if(currentUser) localStorage.setItem(currentUser+"_devices", JSON.stringify(devices));
-}
+// Earnings
+let earnings = users[currentUser] || 0;
 
-// Render devices + multiplier + status
+// Leaderboard toggle
+let leaderboardVisible = false;
+
+// Render devices
 function renderDevices(){
-  const divParent = document.getElementById("devices");
-  divParent.innerHTML = "";
-  let activeDevices = 0;
-
-  devices.forEach(d=>{
-    if(d.running){
-      activeDevices++;
-      const div = document.createElement("div");
-      div.className = "device";
-      div.id = "device"+d.id;
-      div.innerHTML = `Device ${d.id} <button onclick="disconnect(${d.id})">Disconnect</button>`;
-      divParent.appendChild(div);
-    }
-  });
-
-  const multiplierSpan = document.getElementById("multiplier");
-  const status = document.getElementById("status");
-
-  if(activeDevices>0){
-    let multi = 1+(activeDevices-1)*0.5;
-    multiplierSpan.innerText=`x${multi.toFixed(1)}`;
-
-    if(activeDevices>2){
-      status.innerText=`Connected x${multi.toFixed(1)} (Extra Power Active!)`;
-      status.style.color="#ff5722";
-    } else {
-      status.innerText=`Connected x${multi.toFixed(1)}`;
-      status.style.color="#28a745";
-    }
-  } else {
-    multiplierSpan.innerText="";
-    status.innerText="Not Connected";
-    status.style.color="#555";
-  }
+    const devicesDiv = document.getElementById("devices");
+    devicesDiv.innerHTML="";
+    devices.forEach(dev=>{
+        let status = localStorage.getItem("device_"+dev) || "disconnected";
+        let multiplier = (status==="connected")?1.5:1.0;
+        let div = document.createElement("div");
+        div.className="device";
+        div.innerHTML = `<strong>Device ${dev}</strong><br>
+                         <span class="multiplier">x${multiplier}</span><br>
+                         <button onclick="toggleDevice(${dev})">${status==="connected"?"Disconnect":"Connect"}</button>`;
+        devicesDiv.appendChild(div);
+    });
 }
+renderDevices();
 
-// Disconnect device
-function disconnect(id){
-  const device = devices.find(d=>d.id===id);
-  if(device) device.running=false;
-  saveDevices();
-  renderDevices();
-}
-
-// Connect device
-function connect(){
-  const deviceId = devices.length+1;
-  devices.push({id:deviceId, running:true});
-  saveDevices();
-  renderDevices();
-  running=true;
-}
-
-// Load user + devices
-window.onload = function(){
-  const savedUser = localStorage.getItem("currentUser");
-  if(savedUser){
-    currentUser=savedUser;
-    let savedEarning=localStorage.getItem(currentUser);
-    if(savedEarning) earning=parseFloat(savedEarning);
-
-    document.getElementById("user").innerText=currentUser;
-    document.getElementById("earn").innerText=earning.toFixed(3);
-    document.getElementById("loginBox").style.display="none";
-    document.getElementById("app").style.display="block";
-
-    devices=JSON.parse(localStorage.getItem(currentUser+"_devices")) || [];
+// Toggle device
+function toggleDevice(dev){
+    let key = "device_"+dev;
+    let status = localStorage.getItem(key) || "disconnected";
+    localStorage.setItem(key,status==="connected"?"disconnected":"connected");
     renderDevices();
-    updateTopEarners();
-  }
 }
 
-// Login with single device restriction
-function login(){
-  let username=document.getElementById("username").value.trim();
-  if(!username){ alert("Enter username"); return; }
-
-  if(loggedInUsers.includes(username)){
-    alert("This username is already logged in on another device!");
-    return;
-  }
-
-  loggedInUsers.push(username);
-  localStorage.setItem("loggedInUsers", JSON.stringify(loggedInUsers));
-
-  currentUser=username;
-  localStorage.setItem("currentUser", currentUser);
-
-  let saved=localStorage.getItem(currentUser);
-  if(saved) earning=parseFloat(saved);
-  document.getElementById("user").innerText=currentUser;
-  document.getElementById("earn").innerText=earning.toFixed(3);
-
-  document.getElementById("loginBox").style.display="none";
-  document.getElementById("app").style.display="block";
-
-  devices=JSON.parse(localStorage.getItem(currentUser+"_devices")) || [];
-  renderDevices();
-  updateTopEarners();
+// Animate earnings
+function animateEarnings(elem,to){
+    let start = parseFloat(elem.innerText);
+    let diff = to-start;
+    let steps = 10;
+    let stepVal = diff/steps;
+    let i=0;
+    let anim = setInterval(()=>{
+        if(i>=steps){ clearInterval(anim); return; }
+        start+=stepVal;
+        elem.innerText=start.toFixed(3);
+        i++;
+    },50);
 }
 
-// Earnings loop
-setInterval(()=>{
-  if(!running) return;
+// Update earnings
+function updateEarnings(){
+    let totalMultiplier=1.0;
+    devices.forEach(dev=>{
+        if(localStorage.getItem("device_"+dev)==="connected") totalMultiplier+=0.5;
+    });
+    earnings+=0.01*totalMultiplier;
+    users[currentUser]=parseFloat(earnings.toFixed(3));
+    localStorage.setItem("users",JSON.stringify(users));
+    animateEarnings(document.getElementById("earnings"),earnings);
 
-  let activeDevices=devices.filter(d=>d.running).length;
-  if(activeDevices===0) return;
+    // Network earnings
+    let network = Object.values(users).reduce((a,b)=>a+b,0);
+    animateEarnings(document.getElementById("networkEarnings"),network);
 
-  let multiplier=1+(activeDevices-1)*0.5;
-  earning+=0.001*multiplier;
-  document.getElementById("earn").innerText=earning.toFixed(3);
+    // Leaderboard update
+    if(leaderboardVisible) renderLeaderboard();
+}
+setInterval(updateEarnings,1000);
 
-  if(currentUser) localStorage.setItem(currentUser, earning);
-  updateTopEarners();
-},1000);
+// Render leaderboard
+function renderLeaderboard(){
+    const lb = document.getElementById("leaderboard");
+    lb.innerHTML="";
+    let sorted = Object.entries(users).sort((a,b)=>b[1]-a[1]);
+    sorted.forEach(u=>{
+        let li=document.createElement("li");
+        li.innerText=`${u[0]} : ${u[1].toFixed(3)}`;
+        lb.appendChild(li);
+    });
+}
 
-// Sorted Top Earners
-function updateTopEarners(){
-  const earnersList=document.getElementById("earnersList");
-  earnersList.innerHTML="";
-
-  let users=[];
-  for(let key in localStorage){
-    if(localStorage.hasOwnProperty(key) && key!=="currentUser" && !key.endsWith("_devices") && key!=="loggedInUsers"){
-      users.push({name:key, earn:parseFloat(localStorage.getItem(key))});
+// Admin functions
+function addUser(){
+    let newUser=document.getElementById("newUser").value.trim();
+    if(newUser && !users[newUser]){
+        users[newUser]=0;
+        localStorage.setItem("users",JSON.stringify(users));
+        alert(`${newUser} added`);
+        document.getElementById("newUser").value="";
     }
-  }
-
-  users.sort((a,b)=>b.earn - a.earn);
-
-  users.slice(0,10).forEach(u=>{
-    const li=document.createElement("li");
-    li.innerText=`${u.name}: ${u.earn.toFixed(3)}`;
-    earnersList.appendChild(li);
-  });
 }
 
-// Remove from loggedInUsers on page unload
-window.addEventListener("beforeunload",function(){
-  if(currentUser){
-    loggedInUsers=loggedInUsers.filter(u=>u!==currentUser);
-    localStorage.setItem("loggedInUsers",JSON.stringify(loggedInUsers));
-  }
-});
+function removeUser(){
+    let username=prompt("Enter username to remove:");
+    if(username && users[username]){
+        delete users[username];
+        localStorage.setItem("users",JSON.stringify(users));
+        alert(`${username} removed`);
+    } else alert("User not found!");
+}
+
+function resetEarnings(){
+    Object.keys(users).forEach(u=>users[u]=0);
+    localStorage.setItem("users",JSON.stringify(users));
+    earnings=0;
+    document.getElementById("earnings").innerText=earnings.toFixed(3);
+    document.getElementById("networkEarnings").innerText=0;
+    alert("All earnings reset!");
+}
+
+function toggleLeaderboard(){
+    leaderboardVisible=!leaderboardVisible;
+    document.getElementById("leaderboardCard").style.display = leaderboardVisible?"block":"none";
+    if(leaderboardVisible) renderLeaderboard();
+}
