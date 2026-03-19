@@ -51,7 +51,7 @@ function connect() {
 // EARNING LOOP
 setInterval(() => {
   if (running) {
-    earning += 0.02;
+    earning += 0.001;
     document.getElementById("earn").innerText = earning.toFixed(2);
 
     // Save data
