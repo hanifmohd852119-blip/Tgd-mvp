@@ -8,7 +8,7 @@ function saveDevices() {
   if (currentUser) localStorage.setItem(currentUser + "_devices", JSON.stringify(devices));
 }
 
-// Render devices + multiplier
+// Render devices + multiplier + status
 function renderDevices() {
   const divParent = document.getElementById("devices");
   divParent.innerHTML = "";
@@ -26,13 +26,18 @@ function renderDevices() {
   });
 
   const multiplierSpan = document.getElementById("multiplier");
+  const status = document.getElementById("status");
   if (activeDevices > 0) {
     let multi = 1 + (activeDevices - 1) * 0.5;
     multiplierSpan.innerText = `x${multi.toFixed(1)}`;
-  } else multiplierSpan.innerText = "";
+    status.innerText = "Connected ";
+  } else {
+    multiplierSpan.innerText = "";
+    status.innerText = "Not Connected ";
+  }
 }
 
-// Disconnect a device
+// Disconnect device
 function disconnect(id) {
   const device = devices.find(d => d.id === id);
   if (device) device.running = false;
@@ -40,7 +45,7 @@ function disconnect(id) {
   renderDevices();
 }
 
-// Connect a new device
+// Connect device
 function connect() {
   const deviceId = devices.length + 1;
   devices.push({id: deviceId, running: true});
@@ -58,6 +63,7 @@ window.onload = function() {
     if (savedEarning) earning = parseFloat(savedEarning);
 
     document.getElementById("user").innerText = currentUser;
+    document.getElementById("earn").innerText = earning.toFixed(3);
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("app").style.display = "block";
 
@@ -69,16 +75,16 @@ window.onload = function() {
 
 // Login
 function login() {
-  const username = document.getElementById("username").value;
+  let username = document.getElementById("username").value.trim();
   if (!username) { alert("Enter username"); return; }
-
   currentUser = username;
   localStorage.setItem("currentUser", currentUser);
 
   let saved = localStorage.getItem(currentUser);
   if (saved) earning = parseFloat(saved);
-
   document.getElementById("user").innerText = currentUser;
+  document.getElementById("earn").innerText = earning.toFixed(3);
+
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("app").style.display = "block";
 
@@ -121,4 +127,4 @@ function updateTopEarners() {
     li.innerText = `${u.name}: ${u.earn.toFixed(3)}`;
     earnersList.appendChild(li);
   });
-}
+  }
