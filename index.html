@@ -4,12 +4,24 @@
   <title>TGD MVP</title>
 </head>
 <body>
+
   <h1>TGD Network</h1>
 
-  <button onclick="connect()">Connect Device</button>
-  <p id="status">Not Connected</p>
+  <!-- LOGIN -->
+  <div id="loginBox">
+    <input type="text" id="username" placeholder="Enter Username">
+    <button onclick="login()">Login</button>
+  </div>
 
-  <h2>Earnings: <span id="earn">0</span></h2>
+  <!-- DASHBOARD -->
+  <div id="app" style="display:none;">
+    <h3>Welcome, <span id="user"></span></h3>
+
+    <button onclick="connect()">Connect Device</button>
+    <p id="status">Not Connected</p>
+
+    <h2>💰 Earnings: <span id="earn">0</span></h2>
+  </div>
 
   <script src="script.js"></script>
 </body>
