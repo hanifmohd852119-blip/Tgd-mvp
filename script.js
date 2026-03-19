@@ -137,3 +137,17 @@ function addUser(){
         if(leaderboardVisible) renderLeaderboard(); // leaderboard update if visible
     }
 }
+function addUser(){
+    let newUser = document.getElementById("newUser").value.trim();
+    if(newUser && !users[newUser]){
+        users[newUser] = 0;
+        localStorage.setItem("users", JSON.stringify(users));
+        alert(`${newUser} added`);
+        document.getElementById("newUser").value = "";
+
+        // --- Add this part ---
+        renderDevices();                // dashboard refresh
+        updateEarnings();               // earnings update
+        if(leaderboardVisible) renderLeaderboard(); // leaderboard update
+    }
+}
