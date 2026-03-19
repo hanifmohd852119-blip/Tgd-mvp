@@ -29,3 +29,16 @@
 </body>
 </html>
 <script src="script.js"></script>
+<div id="loginBox">
+  <input type="text" id="username" placeholder="Enter Username">
+  <button onclick="login()">Login</button>
+</div>
+
+<div id="app" style="display:none;">
+  <h3>Welcome, <span id="user"></span></h3>
+  <button onclick="connect()">Connect Device</button>
+  <p id="status">Not Connected</p>
+  <h2>💰 Earnings: <span id="earn">0</span></h2>
+</div>
+
+<script src="script.js"></script>
