@@ -1,82 +1,114 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>TGD Network MVP</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f8fa;
-      text-align: center;
-      padding: 50px;
+let earning = 0;
+let running = false;
+let currentUser = "";
+let devices = [];
+
+// Save devices to localStorage
+function saveDevices() {
+  if (currentUser) {
+    localStorage.setItem(currentUser + "_devices", JSON.stringify(devices));
+  }
+}
+
+// Render devices buttons
+function renderDevices() {
+  const divParent = document.getElementById("devices");
+  divParent.innerHTML = "";
+  devices.forEach(d => {
+    if (d.running) {
+      const div = document.createElement("div");
+      div.className = "device";
+      div.id = "device" + d.id;
+      div.innerHTML = `Device ${d.id} <button onclick="disconnect(${d.id})">Disconnect</button>`;
+      divParent.appendChild(div);
     }
+  });
+}
 
-    h1 { color: #007bff; }
+// Disconnect a device
+function disconnect(id) {
+  const device = devices.find(d => d.id === id);
+  if (device) device.running = false;
+  saveDevices();
+  renderDevices();
+}
 
-    #loginBox, #app {
-      background: #ffffff;
-      display: inline-block;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      margin-top: 30px;
+// Connect a new device
+function connect() {
+  const deviceId = devices.length + 1;
+  devices.push({id: deviceId, running: true});
+  saveDevices();
+  renderDevices();
+  running = true;
+}
+
+// Load user and devices on page load
+window.onload = function() {
+  const savedUser = localStorage.getItem("currentUser");
+  if (savedUser) {
+    currentUser = savedUser;
+
+    let savedEarning = localStorage.getItem(currentUser);
+    if (savedEarning) earning = parseFloat(savedEarning);
+
+    document.getElementById("user").innerText = currentUser;
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("app").style.display = "block";
+
+    // Load devices
+    devices = JSON.parse(localStorage.getItem(currentUser + "_devices")) || [];
+    renderDevices();
+
+    updateTopEarners();
+  }
+}
+
+// Login function
+function login() {
+  const username = document.getElementById("username").value;
+  if (!username) { alert("Enter username"); return; }
+
+  currentUser = username;
+  localStorage.setItem("currentUser", currentUser);
+
+  let saved = localStorage.getItem(currentUser);
+  if (saved) earning = parseFloat(saved);
+
+  document.getElementById("user").innerText = currentUser;
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("app").style.display = "block";
+
+  // Load devices
+  devices = JSON.parse(localStorage.getItem(currentUser + "_devices")) || [];
+  renderDevices();
+
+  updateTopEarners();
+}
+
+// Earnings loop
+setInterval(() => {
+  if (!running) return;
+
+  let activeDevices = devices.filter(d => d.running).length;
+  if (activeDevices === 0) return;
+
+  let multiplier = 1 + (activeDevices - 1) * 0.5;
+  earning += 0.001 * multiplier;
+  document.getElementById("earn").innerText = earning.toFixed(3);
+
+  if (currentUser) localStorage.setItem(currentUser, earning);
+  updateTopEarners();
+}, 1000);
+
+// Top Earners leaderboard
+function updateTopEarners() {
+  const earnersList = document.getElementById("earnersList");
+  earnersList.innerHTML = "";
+  for (let key in localStorage) {
+    if (localStorage.hasOwnProperty(key) && key !== "currentUser" && !key.endsWith("_devices")) {
+      const li = document.createElement("li");
+      li.innerText = `${key}: ${parseFloat(localStorage.getItem(key)).toFixed(3)}`;
+      earnersList.appendChild(li);
     }
-
-    input[type="text"] {
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      width: 200px;
-      margin-right: 10px;
-    }
-
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    button:hover { background-color: #0056b3; }
-
-    #status { margin-top: 20px; font-weight: bold; }
-
-    #earn { font-size: 24px; color: #28a745; }
-
-    #devices { margin-top: 20px; }
-    .device { margin: 5px; display: inline-block; }
-    #topEarners { margin-top: 30px; text-align: left; display: inline-block; }
-  </style>
-</head>
-<body>
-
-  <h1>TGD Network</h1>
-
-  <div id="loginBox">
-    <input type="text" id="username" placeholder="Enter Username">
-    <button onclick="login()">Login</button>
-  </div>
-
-  <div id="app" style="display:none;">
-    <h3>Welcome, <span id="user"></span></h3>
-
-    <button onclick="connect()">Connect Device</button>
-    <p id="status">Not Connected</p>
-
-    <div id="devices"></div>
-
-    <h2>💰 Earnings: <span id="earn">0</span></h2>
-
-    <div id="topEarners">
-      <h3>Top Earners</h3>
-      <ul id="earnersList"></ul>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
-</body>
-</html>
+  }
+}
