@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>TGD Network MVP</title>
+  <title>TGD Network – Acurast Style</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,7 +12,7 @@
 
     h1 { color: #007bff; margin-bottom: 20px; }
 
-    #loginBox, #app {
+    #loginBox, #app, #adminBox {
       background: #fff;
       display: inline-block;
       padding: 30px;
@@ -70,11 +70,14 @@
     }
 
     #topEarners h3 { margin-top: 0; color: #ff9800; }
+
+    #adminBox { margin-top: 40px; }
+    #adminBox input { width: 180px; }
   </style>
 </head>
 <body>
 
-  <h1>TGD Network</h1>
+  <h1>TGD Network – Acurast Style</h1>
 
   <!-- LOGIN -->
   <div id="loginBox">
@@ -97,6 +100,14 @@
       <h3>Top Earners</h3>
       <ul id="earnersList"></ul>
     </div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="adminBox">
+    <h3>Admin: Add Users</h3>
+    <input type="text" id="newUser" placeholder="New Username">
+    <button onclick="addUser()">Add User</button>
+    <p>Users added to network will appear in login for device login.</p>
   </div>
 
   <script src="script.js"></script>
