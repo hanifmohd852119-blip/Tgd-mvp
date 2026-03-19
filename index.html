@@ -1,115 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>TGD Network – Acurast Style</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f0f4f8;
-      text-align: center;
-      padding: 50px;
-    }
-
-    h1 { color: #007bff; margin-bottom: 20px; }
-
-    #loginBox, #app, #adminBox {
-      background: #fff;
-      display: inline-block;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-      margin-top: 20px;
-    }
-
-    input[type="text"] {
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      width: 220px;
-      margin-right: 10px;
-    }
-
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      background-color: #007bff;
-      color: white;
-      cursor: pointer;
-      transition: 0.3s;
-      margin: 5px;
-    }
-
-    button:hover { background-color: #0056b3; }
-
-    #status { margin-top: 20px; font-weight: bold; color: #555; }
-    #earn { font-size: 28px; color: #28a745; font-weight: bold; margin-top: 10px; }
-    #devices { margin-top: 20px; }
-    .device {
-      display: inline-block;
-      background: #e3f2fd;
-      padding: 8px 12px;
-      border-radius: 10px;
-      margin: 5px;
-      font-weight: bold;
-      min-width: 120px;
-    }
-
-    .multiplier { color: #ff5722; font-weight: bold; margin-left: 8px; }
-
-    #topEarners {
-      margin-top: 30px;
-      text-align: left;
-      display: inline-block;
-      background: #fff3e0;
-      padding: 15px;
-      border-radius: 10px;
-      width: 220px;
-    }
-
-    #topEarners h3 { margin-top: 0; color: #ff9800; }
-
-    #adminBox { margin-top: 40px; }
-    #adminBox input { width: 180px; }
-  </style>
+<meta charset="UTF-8">
+<title>TGD Network – Final AI MVP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body { font-family:'Segoe UI',Arial; margin:0; padding:10px; background:#eef2f7;}
+h1,h2 { margin:0 0 10px 0; color:#1e293b; }
+.card { background:#fff; padding:20px; border-radius:15px; margin:10px 0; box-shadow:0 6px 15px rgba(0,0,0,0.1);}
+.devices { display:flex; flex-wrap:wrap; gap:15px; }
+.device { flex:1 1 120px; padding:15px; border-radius:10px; text-align:center; background:linear-gradient(135deg,#c7d2fe,#e0f2fe); box-shadow:0 2px 8px rgba(0,0,0,0.1); position:relative; }
+.device .multiplier { font-weight:bold; color:#1e40af; animation: pulse 1s infinite alternate; }
+@keyframes pulse { 0%{transform:scale(1)} 100%{transform:scale(1.1)} }
+.device button { margin-top:10px; padding:5px 10px; border:none; border-radius:5px; background:#4f46e5; color:#fff; cursor:pointer; }
+.device button:hover { background:#3730a3; }
+.admin input { padding:5px; border-radius:5px; border:1px solid #ccc; margin-bottom:5px; width:100%; }
+.admin button { margin:2px 0; padding:5px 10px; border:none; border-radius:5px; background:#2563eb; color:#fff; cursor:pointer; }
+.admin button:hover { background:#1d4ed8; }
+.earnings { font-size:1.5em; color:#1e3a8a; font-weight:bold; }
+@media(max-width:600px){ .devices { flex-direction: column; } }
+</style>
 </head>
 <body>
 
-  <h1>TGD Network – Acurast Style</h1>
+<h1>TGD Network – Final AI MVP</h1>
+<div id="welcome"></div>
 
-  <!-- LOGIN -->
-  <div id="loginBox">
-    <input type="text" id="username" placeholder="Enter Username">
-    <button onclick="login()">Login</button>
-  </div>
+<div class="card">
+<h2>Devices</h2>
+<div class="devices" id="devices"></div>
+</div>
 
-  <!-- DASHBOARD -->
-  <div id="app" style="display:none;">
-    <h3>Welcome, <span id="user"></span></h3>
+<div class="card">
+<h2>Earnings</h2>
+<p>💰 Your Earnings: <span id="earnings" class="earnings">0</span></p>
+<p>🌐 Network Earnings: <span id="networkEarnings" class="earnings">0</span></p>
+</div>
 
-    <button onclick="connect()">Connect Device</button>
-    <p id="status">Not Connected <span class="multiplier" id="multiplier"></span></p>
+<div class="card admin">
+<h2>Admin Panel</h2>
+<input type="text" id="newUser" placeholder="New Username">
+<button onclick="addUser()">Add User</button>
+<button onclick="removeUser()">Remove User</button>
+<button onclick="resetEarnings()">Reset Earnings</button>
+<button onclick="toggleLeaderboard()">Toggle Leaderboard</button>
+<p>Users added will appear for device login.</p>
+</div>
 
-    <div id="devices"></div>
+<div class="card" id="leaderboardCard" style="display:none;">
+<h2>Leaderboard</h2>
+<ul id="leaderboard"></ul>
+</div>
 
-    <h2>💰 Earnings: <span id="earn">0</span></h2>
-
-    <div id="topEarners">
-      <h3>Top Earners</h3>
-      <ul id="earnersList"></ul>
-    </div>
-  </div>
-
-  <!-- ADMIN PANEL -->
-  <div id="adminBox">
-    <h3>Admin: Add Users</h3>
-    <input type="text" id="newUser" placeholder="New Username">
-    <button onclick="addUser()">Add User</button>
-    <p>Users added to network will appear in login for device login.</p>
-  </div>
-
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
