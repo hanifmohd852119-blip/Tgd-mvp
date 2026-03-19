@@ -1,19 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>TGD MVP</title>
+  <title>TGD Network MVP</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f8fa;
+      text-align: center;
+      padding: 50px;
+    }
+
+    h1 {
+      color: #007bff;
+    }
+
+    #loginBox, #app {
+      background: #ffffff;
+      display: inline-block;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-top: 30px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 200px;
+      margin-right: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    #earn {
+      font-size: 24px;
+      color: #28a745;
+    }
+  </style>
 </head>
 <body>
 
   <h1>TGD Network</h1>
 
-  <!-- LOGIN -->
   <div id="loginBox">
     <input type="text" id="username" placeholder="Enter Username">
     <button onclick="login()">Login</button>
   </div>
 
-  <!-- DASHBOARD -->
   <div id="app" style="display:none;">
     <h3>Welcome, <span id="user"></span></h3>
 
@@ -23,22 +76,6 @@
     <h2>💰 Earnings: <span id="earn">0</span></h2>
   </div>
 
-  <!-- IMPORTANT LINE -->
   <script src="script.js"></script>
-
 </body>
 </html>
-<script src="script.js"></script>
-<div id="loginBox">
-  <input type="text" id="username" placeholder="Enter Username">
-  <button onclick="login()">Login</button>
-</div>
-
-<div id="app" style="display:none;">
-  <h3>Welcome, <span id="user"></span></h3>
-  <button onclick="connect()">Connect Device</button>
-  <p id="status">Not Connected</p>
-  <h2>💰 Earnings: <span id="earn">0</span></h2>
-</div>
-
-<script src="script.js"></script>
